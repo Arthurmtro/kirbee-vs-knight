@@ -1,49 +1,37 @@
 <template>
-  <div class="App" id="app">
-    <div class="game">
-      <div class="demo-scene">
-        <p>{{ status }}</p>
-        <button @click="ping">Ping</button>
-      </div>
-    </div>
+  <div
+    @click="clickPage"
+    class="App"
+    id="app"
+    :class="{ win: this.$store.state.status === 'Win' }"
+  >
+    <GameField />
   </div>
 </template>
 
 <script>
-import io from 'socket.io-client';
-
-const socket = io(`${location.protocol}//${location.hostname}:3006`);
+import GameField from "./components/GameField.vue";
 
 export default {
-  name: 'App',
-
-  data () {
-    return {
-      status: 'connecting...'
-    }
+  name: "App",
+  components: {
+    GameField,
   },
 
-  mounted () {
-      socket.on('connect', () => {
-        this.status = 'connected';
-      });
-      socket.on('disconnect', () => {
-        this.status = 'disconnected';
-      });
-      socket.on('reconnect', () => {
-        this.status = 'connected';
-      });
-      socket.on('pong', () => {
-        console.log('pong received !');
-      });
+  mounted() {
+    this.$store.commit("syncSocket");
   },
 
   methods: {
-    ping () {
-      socket.emit('ping');
-    }
-  }
-}
+    clickPage() {
+      if (this.$store.state.status === "Go") {
+        this.$store.commit("playerClick");
+      } else if (this.$store.state.status === "Wait") {
+        this.$store.commit("playerFailed");
+      }
+    },
+  },
+};
 </script>
 
 <style scoped>
@@ -57,25 +45,19 @@ export default {
   align-items: center;
 }
 
-.game {
-  width: 512px;
-  max-width: 90%;
-  height: 444px;
-  max-height: 90%;
-  background: url(/images/background.png) center center;
-  box-shadow: 0 0 9px rgb(0 0 0 / 60%), 0 0 0 9999px rgb(255 255 255 / 40%);
-  border-radius: 5px;
-  overflow: hidden;
+.win {
+  animation: flash 2s linear;
 }
 
-.demo-scene {
-  height: 100%;
-  padding: 0.7rem;
-  text-align: center;
-  color: white;
-}
-
-.demo-scene p {
-  margin-bottom: 2rem;
+@keyframes flash {
+  0% {
+    opacity: 1;
+  }
+  2% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 </style>
