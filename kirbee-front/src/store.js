@@ -34,28 +34,40 @@ const mutations = {
     });
 
     socket.on("joined", (playerStatus) => {
+      if (state.status === "full") return;
+
       state.status = "Waiting for a player";
       state.player = playerStatus.name;
     });
 
     socket.on("start-chrono", () => {
+      if (state.status === "full") return;
+
       state.status = "Wait";
     });
 
     socket.on("match-ready", () => {
+      if (state.status === "full") return;
+
       state.status = "Match can start";
       state.buttonLabel = "Ready";
     });
 
     socket.on("oponnent-leave", () => {
+      if (state.status === "full") return;
+
       if (state.status !== "connected") state.status = "Waiting for a player";
     });
 
     socket.on("chrono-end", () => {
+      if (state.status === "full") return;
+
       state.status = "Go";
     });
 
     socket.on("win", (winnerName) => {
+      if (state.status === "full") return;
+
       state.winnerName = winnerName;
       state.status = "Win";
       state.buttonLabel = "Revenge";
